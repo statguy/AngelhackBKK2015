@@ -22,81 +22,6 @@ import java.sql.SQLException;
  * a simple static http server
 */
 public class HttpServerTest {
-/*
-    private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8000;
-    private static final int BACKLOG = 1;
-
-    private static final String HEADER_ALLOW = "Allow";
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
-
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
-
-    private static final int STATUS_OK = 200;
-    private static final int STATUS_METHOD_NOT_ALLOWED = 405;
-
-    private static final int NO_RESPONSE_LENGTH = -1;
-
-    private static final String METHOD_GET = "GET";
-    private static final String METHOD_OPTIONS = "OPTIONS";
-    private static final String ALLOWED_METHODS = METHOD_GET + "," + METHOD_OPTIONS;
-
-    public static void main(final String... args) throws IOException {
-        final HttpServer server = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT), BACKLOG);
-        server.createContext("/func1", he -> {
-            try {
-                final Headers headers = he.getResponseHeaders();
-                final String requestMethod = he.getRequestMethod().toUpperCase();
-                switch (requestMethod) {
-                    case METHOD_GET:
-                        final Map<String, List<String>> requestParameters = getRequestParameters(he.getRequestURI());
-                        // do something with the request parameters
-                        final String responseBody = "['hello world!']";
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        final byte[] rawResponseBody = responseBody.getBytes(CHARSET);
-                        he.sendResponseHeaders(STATUS_OK, rawResponseBody.length);
-                        he.getResponseBody().write(rawResponseBody);
-                        break;
-                    case METHOD_OPTIONS:
-                        headers.set(HEADER_ALLOW, ALLOWED_METHODS);
-                        he.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
-                        break;
-                    default:
-                        headers.set(HEADER_ALLOW, ALLOWED_METHODS);
-                        he.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
-                        break;
-                }
-            } finally {
-                he.close();
-            }
-        });
-        server.start();
-    }
-
-    private static Map<String, List<String>> getRequestParameters(final URI requestUri) {
-        final Map<String, List<String>> requestParameters = new LinkedHashMap<>();
-        final String requestQuery = requestUri.getRawQuery();
-        if (requestQuery != null) {
-            final String[] rawRequestParameters = requestQuery.split("[&;]", -1);
-            for (final String rawRequestParameter : rawRequestParameters) {
-                final String[] requestParameter = rawRequestParameter.split("=", 2);
-                final String requestParameterName = decodeUrlComponent(requestParameter[0]);
-                requestParameters.putIfAbsent(requestParameterName, new ArrayList<>());
-                final String requestParameterValue = requestParameter.length > 1 ? decodeUrlComponent(requestParameter[1]) : null;
-                requestParameters.get(requestParameterName).add(requestParameterValue);
-            }
-        }
-        return requestParameters;
-    }
-
-    private static String decodeUrlComponent(final String urlComponent) {
-        try {
-            return URLDecoder.decode(urlComponent, CHARSET.name());
-        } catch (final UnsupportedEncodingException ex) {
-            throw new InternalError(ex);
-        }
-    }
-*/
 	public static void main(String[] args) throws Exception {
 		
 		Connection conn = null;
@@ -144,8 +69,6 @@ public class HttpServerTest {
 		  final String requestMethod = t.getRequestMethod().toUpperCase();
 		  
 		  String response = "";
-		  //String response = "<html><body>";
-		  //response += "your request method was = " + requestMethod + "<br>";
 
 		  System.out.println("Request received " + t.getRequestURI().getQuery());
 		  
@@ -166,17 +89,12 @@ public class HttpServerTest {
 		    		  obj.put("field", "pattaya");
 		    	  }
 		    	  else {
-		    		  //obj.put("field", null);
 		    	  }
 		    	  
 		    	  response += obj.toJSONString();
 		      }
 		  }
-		  
-		  		  
-    	
-	      //response += "</body></html>";
-	      
+		  	      
 		  t.sendResponseHeaders(200, response.length());
 		  OutputStream os = t.getResponseBody();
 		  os.write(response.getBytes());
