@@ -91,7 +91,8 @@ public class HttpServerTest {
 	    }
 	    return resList;
 	}
-  
+	
+	// TODO: Change this http server to better one in production
   	static class MyHandler implements HttpHandler {
 		  public void handle(HttpExchange exchange) throws IOException {
 			  //final Headers headers = exchange.getResponseHeaders();
@@ -113,16 +114,48 @@ public class HttpServerTest {
 			  
 			  String path = exchange.getRequestURI().getPath();
 			  if (path.equals("/findmatch")) {
-				  if (params != null) {			  
+				  //if (params != null) {			  
 					  try {
 						  String lat = params.get("lat");
 						  String lng = params.get("lng");
-						  String dist = params.get("dist");
+						  //String dist = params.get("dist");
 						  
 						  // TODO: check for valid parameters
 						  
 						  Statement stm = db.createStatement();
-						  String query = "SELECT id,name,lat,lng,type FROM fields";// WHERE lat="+lat+" AND lng"+lng;
+						  //String query = "SELECT id,name,lat,lng,type FROM fields";// WHERE lat="+lat+" AND lng"+lng;
+						  
+						  String query = "SELECT b.id, f.name, b.player_limit, b.player_needed, EUCLIDEAN_DISTANCE(" +lat+ "," +lng+ ", f.lat, f.lng) AS distance, u.firstname as host_firstname, u.lastname as host_lastname, b.book_date, b.time_slot as hours " +
+								  "FROM books b JOIN fields f ON b.field_id = f.id join users u on b.user_id = u.id WHERE book_date = DATE(NOW()) AND HOUR(NOW()) >= time_slot ORDER BY distance";
+						  
+						  ResultSet rs = stm.executeQuery(query);
+						  JSONObjectList = getFormattedResult(rs);
+					  }
+					  catch (SQLException e) {
+						e.printStackTrace();
+					  }
+					  
+					  response += "[";
+					  for (int i = 0; i < JSONObjectList.size(); i++) {
+						  JSONObject o = JSONObjectList.get(i);
+						  System.out.println(o.toJSONString());
+				    	  response += o.toJSONString();
+				    	  if (!(i == JSONObjectList.size()-1)) response += ",\r\n";
+					  }
+					  response += "]\r\n";
+			      //}
+			  }
+			  
+			  else if (path.equals("/finduser")) {
+				  
+				  if (params != null) {			  
+					  try {
+						  String user_id = params.get("user_id");
+						  
+						  // TODO: check for valid parameters
+						  
+						  Statement stm = db.createStatement();
+						  String query = "SELECT id,name,type FROM users WHERE id="+user_id;
 						  ResultSet rs = stm.executeQuery(query);
 						  JSONObjectList = getFormattedResult(rs);
 					  }
@@ -139,7 +172,48 @@ public class HttpServerTest {
 					  }
 					  response += "]\r\n";
 			      }
+				  else {
+					  System.out.println("Missing parameters.");
+					  exchange.sendResponseHeaders(400, 0);
+					  exchange.close();
+					  return;
+				  }
 			  }
+			  
+			  else if (path.equals("/findfriends")) {
+				  
+				  if (params != null) {			  
+					  try {
+						  String user_id = params.get("user_id");
+						  
+						  // TODO: check for valid parameters
+						  
+						  Statement stm = db.createStatement();
+						  String query = "SELECT id,name,type FROM friends WHERE id="+user_id;
+						  ResultSet rs = stm.executeQuery(query);
+						  JSONObjectList = getFormattedResult(rs);
+					  }
+					  catch (SQLException e) {
+						e.printStackTrace();
+					  }
+					  
+					  response += "[";
+					  for (int i = 0; i < JSONObjectList.size(); i++) {
+						  JSONObject o = JSONObjectList.get(i);
+						  System.out.println(o.toJSONString());
+				    	  response += o.toJSONString();
+				    	  if (!(i == JSONObjectList.size()-1)) response += ",\r\n";
+					  }
+					  response += "]\r\n";
+			      }
+				  else {
+					  System.out.println("Missing parameters.");
+					  exchange.sendResponseHeaders(400, 0);
+					  exchange.close();
+					  return;
+				  }
+			  }
+			  
 			  else {
 				  System.out.println("Unrecognized query function.");
 				  exchange.sendResponseHeaders(400, 0);
