@@ -92,7 +92,7 @@ public class HttpServerTest {
 	    return resList;
 	}
 	
-	// TODO: Change this http server to better one in production
+	// TODO: Replace http server
   	static class MyHandler implements HttpHandler {
 		  public void handle(HttpExchange exchange) throws IOException {
 			  //final Headers headers = exchange.getResponseHeaders();
@@ -126,8 +126,11 @@ public class HttpServerTest {
 						  //String query = "SELECT id,name,lat,lng,type FROM fields";// WHERE lat="+lat+" AND lng"+lng;
 						  
 						  String query = "SELECT b.id, f.name, b.player_limit, b.player_needed, EUCLIDEAN_DISTANCE(" +lat+ "," +lng+ ", f.lat, f.lng) AS distance, u.firstname as host_firstname, u.lastname as host_lastname, b.book_date, b.time_slot as hours " +
-								  "FROM books b JOIN fields f ON b.field_id = f.id join users u on b.user_id = u.id WHERE book_date = DATE(NOW()) AND HOUR(NOW()) >= time_slot ORDER BY distance";
-						  
+								  "FROM books b JOIN fields f ON b.field_id = f.id join users u on b.user_id = u.id WHERE book_date = DATE(NOW()) AND time_slot >= HOUR(NOW()+11) ORDER BY distance";
+
+						  //String query = "SELECT b.id, f.name, b.player_limit, b.player_needed, EUCLIDEAN_DISTANCE(13.721420,100.524177, f.lat, f.lng) AS distance, u.firstname as host_firstname, u.lastname as host_lastname, b.book_date, b.time_slot as hours " +
+						//		  "FROM books b JOIN fields f ON b.field_id = f.id join users u on b.user_id = u.id WHERE book_date = DATE(NOW()) AND HOUR(NOW()) >= time_slot ORDER BY distance";
+
 						  ResultSet rs = stm.executeQuery(query);
 						  JSONObjectList = getFormattedResult(rs);
 					  }
